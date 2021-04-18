@@ -10,7 +10,7 @@ jobs:
       - name: Generate projects
         shell: cmd
         run: |
-          dir
+          dir C:\Users\runner
           cd test
           ..\vendor\premake5.exe vs2019
       - name: Build Projects
