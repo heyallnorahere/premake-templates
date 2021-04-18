@@ -1,0 +1,6 @@
+# gnu makefiles
+Makefile
+*.make
+# binaries
+bin/
+bin-int/
