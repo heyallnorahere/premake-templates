@@ -1,0 +1,20 @@
+name: build
+on: [ push ]
+jobs:
+  Windows-Build:
+    runs-on: windows-latest
+    steps:
+      env:
+        VS_PATH: C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\
+        MSBUILD_PATH: C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\
+      steps:
+        - name: Generate projects
+          shell: cmd
+          run: |
+            cd test
+            ..\vendor\premake5.exe vs2019
+        - name: Build Projects
+          shell: cmd
+          run: |
+            call "%VS_PATH%\VC\Auxiliary\Build\vcvars64.bat"
+            msbuild ..\scripts\test-workspace.sln

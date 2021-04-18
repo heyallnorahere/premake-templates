@@ -1,6 +1,16 @@
 # gnu makefiles
 Makefile
 *.make
+# visual studio project files
+.vs/
+*.*proj*
+*.sln
+# visual studio code config files
+.vscode/
+# xcode project files
+*.xcworkspace/
+# mac bullshit
+.DS_Store
 # binaries
 bin/
 bin-int/
