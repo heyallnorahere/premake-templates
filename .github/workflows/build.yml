@@ -10,10 +10,9 @@ jobs:
       - name: Generate projects
         shell: cmd
         run: |
-          cd "${{github.workspace}}\test"
-          "..\vendor\premake5.exe" vs2019
+          "${{github.workspace}}\vendor\premake5.exe" vs2019 --file="${{github.workspace}}\test\premake5.lua"
       - name: Build Projects
         shell: cmd
         run: |
           call "%VS_PATH%\VC\Auxiliary\Build\vcvars64.bat"
-          msbuild "..\scripts\test-workspace.sln"
+          msbuild "${{github.workspace}}\scripts\test-workspace.sln"
