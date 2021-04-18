@@ -10,8 +10,7 @@ jobs:
       - name: Generate projects
         shell: cmd
         run: |
-          dir C:\Users\runner
-          cd test
+          cd ${{github.workspace}}\test
           ..\vendor\premake5.exe vs2019
       - name: Build Projects
         shell: cmd
