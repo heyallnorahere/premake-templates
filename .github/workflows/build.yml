@@ -22,6 +22,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: generate projects
         run: |
+          chmod +x ${{github.workspace}}/vendor/premake5
           ${{github.workspace}}/vendor/premake5 gmake --file=${{github.workspace}}/test/premake5.lua
       - name: build projects
         run: |
