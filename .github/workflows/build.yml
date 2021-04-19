@@ -7,6 +7,7 @@ jobs:
       VS_PATH: C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\
       MSBUILD_PATH: C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\
     steps:
+      - uses: actions/checkout@v2
       - name: generate projects
         shell: cmd
         run: |
@@ -18,6 +19,7 @@ jobs:
   ubuntu-build:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: generate projects
         run: |
           ${{github.workspace}}/vendor/premake5 gmake --file=${{github.workspace}}/test/premake5.lua
