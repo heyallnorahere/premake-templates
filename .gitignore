@@ -14,3 +14,5 @@ Makefile
 # binaries
 bin/
 bin-int/
+# pulled repositories
+curl/

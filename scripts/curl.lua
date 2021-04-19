@@ -12,33 +12,39 @@ project "curl"
     language "C"
     cdialect "C11"
     staticruntime "on"
-    targetdir ("bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/%{prj.name}")
-    objdir ("bin-int/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/%{prj.name}")
+    targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+    objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
     includedirs {
         (curldir .. "/include"),
         (curldir .. "/lib"),
     }
     defines {
-        "BUILDING_LIBCURL"
+        "BUILDING_LIBCURL",
+        "CURL_STATICLIB",
     }
     files {
         (curldir .. "/lib/**.c"),
         (curldir .. "/lib/**.h"),
         (curldir .. "/include/**.h"),
     }
+    links {
+        "ws2_32.lib",
+        "crypt32.lib",
+        "wldap32.lib",
+    }
     filter { "system:windows", "options:encryptionlib=openssl" }
         links {
-            "ws2_32.lib",
             "libssl.lib",
             "libcrypto.lib",
-            "wldap32.lib",
-            "crypt32.lib",
         }
         libdirs {
-            "C:/Progam Files/OpenSSL/lib"
+            "C:/Program Files/OpenSSL/lib"
         }
         sysincludedirs {
             "C:/Program Files/OpenSSL/include"
+        }
+        defines {
+            "USE_OPENSSL"
         }
     filter "configurations:Debug"
         symbols "on"

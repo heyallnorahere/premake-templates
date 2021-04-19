@@ -8,6 +8,9 @@ jobs:
       MSBUILD_PATH: C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\
     steps:
       - uses: actions/checkout@v2
+      - name: pull curl
+        run: |
+          git clone https://github.com/curl/curl ${{github.workspace}}/test/curl
       - name: generate projects
         shell: cmd
         run: |
@@ -20,6 +23,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: pull curl
+        run: |
+          git clone https://github.com/curl/curl ${{github.workspace}}/test/curl
       - name: generate projects
         run: |
           chmod +x ${{github.workspace}}/vendor/premake5
