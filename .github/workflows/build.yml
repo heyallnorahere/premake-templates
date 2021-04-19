@@ -10,9 +10,17 @@ jobs:
       - name: generate projects
         shell: cmd
         run: |
-          dir D:\a\premake-templates
           "${{github.workspace}}\vendor\premake5.exe" vs2019 --file="${{github.workspace}}\test\premake5.lua"
       - name: build projects
         shell: cmd
         run: |
           "%MSBUILD_PATH%\MSBuild.exe" "${{github.workspace}}\scripts\test-workspace.sln"
+  ubuntu-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: generate projects
+        run: |
+          vendor/premake5 gmake --file=test/premake5.lua
+      - name: build projects
+        run: |
+          make -C scripts
