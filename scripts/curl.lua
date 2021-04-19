@@ -34,14 +34,11 @@ project "curl"
     }
     filter { "system:windows", "options:encryptionlib=openssl" }
         links {
-            "libssl.lib",
-            "libcrypto.lib",
-        }
-        libdirs {
-            "C:/Program Files/OpenSSL/lib"
+            (os.findlib("libssl.lib") or "C:/Program Files/OpenSSL/lib/libssl.lib"),
+            (os.findlib("libcrypto.lib") or "C:/Program Files/OpenSSL/lib/libcrypto.lib")
         }
         sysincludedirs {
-            "C:/Program Files/OpenSSL/include"
+            (os.findheader("ssl.h") or "C:/Program Files/OpenSSL/include")
         }
         defines {
             "USE_OPENSSL"
