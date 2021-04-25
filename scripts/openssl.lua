@@ -9,23 +9,26 @@ local function sslprojsettings()
     files {
         _SCRIPT
     }
+    defines {
+        "OPENSSL_CPUID_OBJ"
+    }
 end
 local function asmbuildsettings()
-    local format = ""
+    asmformat = ""
+    asmcommand = ""
     if os.istarget("windows") then
-        format = "win64"
+        asmformat = "nasm"
+        asmcommand = 'nasm -f win64 -DNEAR -Ox'
     elseif os.istarget("linux") then
-        format = "elf64"
-    elseif os.istarget("macosx") then
-        format = "macho64"
+        asmformat = "elf"
+        asmcommand = "gcc -DOPENSSL_THREADS -D_REENTRANT -DDSO_DLFCN -DHAVE_DLFCN_H -Wa,--noexecstack -m64 -DL_ENDIAN -DTERMIO -O3 -Wall -DOPENSSL_IA32_SSE2 -DOPENSSL_BN_ASM_MONT -DOPENSSL_BN_ASM_MONT5 -DOPENSSL_BN_ASM_GF2m -DSHA1_ASM -DSHA256_ASM -DSHA512_ASM -DMD5_ASM -DAES_ASM -DVPAES_ASM -DBSAES_ASM -DWHIRLPOOL_ASM -DGHASH_ASM -DECP_NISTZ256_ASM"
     end
     out = "%{cfg.objdir}/%{file.basename}"
-    nasmcommand = 'nasm -f ' .. format .. ' -DNEAR -Ox'
     filter "files:**.pl"
         buildmessage "%{file.basename}.s"
         buildcommands {
-            ('perl "%{file.relpath}" nasm "' .. out .. '.s"'),
-            (nasmcommand .. ' -o "' .. out .. '.obj" "' .. out .. '.s"')
+            ('perl "%{file.relpath}" ' .. asmformat .. ' "' .. out .. '.s"'),
+            (asmcommand .. ' -o "' .. out .. '.obj" "' .. out .. '.s"')
         }
         buildoutputs {
             (out .. ".obj")
@@ -64,7 +67,7 @@ local function pull_openssl()
     local scriptdir = path.getdirectory(_SCRIPT)
     print("pulling openssl")
     os.execute("curl " .. openssl_url .. " -o " .. scriptdir .. "/openssl_source/source.tar.gz")
-    local extract_command = "tar -xvf " .. "openssl_source/source.tar.gz --skip-old-files -C " .. "openssl_source/"
+    local extract_command = "tar -xvf " .. "openssl_source/source.tar.gz --overwrite -C " .. "openssl_source/"
     os.execute(extract_command)
     local command = ""
     if os.istarget("windows") then
