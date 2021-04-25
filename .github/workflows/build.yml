@@ -18,7 +18,7 @@ jobs:
       - name: build projects
         shell: cmd
         run: |
-          "%MSBUILD_PATH%\MSBuild.exe" "${{github.workspace}}\scripts\test-workspace.sln"
+          "%MSBUILD_PATH%\MSBuild.exe" "${{github.workspace}}\test\test-workspace.sln"
   ubuntu-build:
     runs-on: ubuntu-latest
     steps:
@@ -30,6 +30,9 @@ jobs:
         run: |
           chmod +x ${{github.workspace}}/vendor/premake5
           ${{github.workspace}}/vendor/premake5 gmake --file=${{github.workspace}}/test/premake5.lua
+      - name: install nasm
+        run: |
+          sudo apt-get install nasm
       - name: build projects
         run: |
-          make -C ${{github.workspace}}/scripts
+          make -C ${{github.workspace}}/test
