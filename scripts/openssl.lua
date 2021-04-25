@@ -21,7 +21,7 @@ local function asmbuildsettings()
         asmcommand = 'nasm -f win64 -DNEAR -Ox'
     elseif os.istarget("linux") then
         asmformat = "elf"
-        asmcommand = "gcc -DOPENSSL_THREADS -D_REENTRANT -DDSO_DLFCN -DHAVE_DLFCN_H -Wa,--noexecstack -m64 -DL_ENDIAN -DTERMIO -O3 -Wall -DOPENSSL_IA32_SSE2 -DOPENSSL_BN_ASM_MONT -DOPENSSL_BN_ASM_MONT5 -DOPENSSL_BN_ASM_GF2m -DSHA1_ASM -DSHA256_ASM -DSHA512_ASM -DMD5_ASM -DAES_ASM -DVPAES_ASM -DBSAES_ASM -DWHIRLPOOL_ASM -DGHASH_ASM -DECP_NISTZ256_ASM"
+        asmcommand = "gcc -c -DOPENSSL_THREADS -D_REENTRANT -DDSO_DLFCN -DHAVE_DLFCN_H -Wa,--noexecstack -m64 -DL_ENDIAN -DTERMIO -O3 -Wall -DOPENSSL_IA32_SSE2 -DOPENSSL_BN_ASM_MONT -DOPENSSL_BN_ASM_MONT5 -DOPENSSL_BN_ASM_GF2m -DSHA1_ASM -DSHA256_ASM -DSHA512_ASM -DMD5_ASM -DAES_ASM -DVPAES_ASM -DBSAES_ASM -DWHIRLPOOL_ASM -DGHASH_ASM -DECP_NISTZ256_ASM -c"
     end
     out = "%{cfg.objdir}/%{file.basename}"
     filter "files:**.pl"
@@ -46,6 +46,10 @@ newoption {
     description = "The revision of the specified OpenSSL version to pull",
     default = "none"
 }
+newoption {
+    trigger = "no-overwrite-option",
+    description = "Omit --skip-old-files in tar command"
+}
 local osslversion = _OPTIONS["openssl-version"]
 local osslrevision = _OPTIONS["openssl-revision"]
 if osslrevision == "none" then
@@ -67,7 +71,10 @@ local function pull_openssl()
     local scriptdir = path.getdirectory(_SCRIPT)
     print("pulling openssl")
     os.execute("curl " .. openssl_url .. " -o " .. scriptdir .. "/openssl_source/source.tar.gz")
-    local extract_command = "tar -xvf " .. "openssl_source/source.tar.gz --overwrite -C " .. "openssl_source/"
+    local extract_command = "tar -xvf " .. "openssl_source/source.tar.gz -C " .. "openssl_source/"
+    if not _OPTIONS["no-overwrite-option"] then
+        extract_command = extract_command .. " --skip-old-files"
+    end
     os.execute(extract_command)
     local command = ""
     if os.istarget("windows") then
