@@ -1,5 +1,5 @@
 newoption {
-    trigger = "encryptionlib",
+    trigger = "ssl",
     value = "LIBRARY",
     description = "Encryption library to use with libcurl",
     default = "openssl",
@@ -7,6 +7,7 @@ newoption {
         { "openssl", "OpenSSL" }
     }
 }
+include "openssl.lua"
 project "curl"
     kind "StaticLib"
     language "C"
@@ -26,22 +27,24 @@ project "curl"
         (curldir .. "/lib/**.c"),
         (curldir .. "/lib/**.h"),
         (curldir .. "/include/**.h"),
+        _SCRIPT
     }
     links {
         "ws2_32.lib",
         "crypt32.lib",
         "wldap32.lib",
     }
-    filter { "system:windows", "options:encryptionlib=openssl" }
+    filter { "system:windows", "options:ssl=openssl" }
         links {
-            (os.findlib("libssl.lib") or "C:/Program Files/OpenSSL/lib/libssl.lib"),
-            (os.findlib("libcrypto.lib") or "C:/Program Files/OpenSSL/lib/libcrypto.lib")
+            "ssl",
+            "crypto"
         }
         sysincludedirs {
-            (os.findheader("ssl.h") or "C:/Program Files/OpenSSL/include")
+            "openssl_include"
         }
         defines {
-            "USE_OPENSSL"
+            "USE_OPENSSL",
+            "OPENSSL_NO_ENGINE"
         }
     filter "configurations:Debug"
         symbols "on"
