@@ -14,7 +14,7 @@ jobs:
       - name: generate projects
         shell: cmd
         run: |
-          "${{github.workspace}}\vendor\premake5.exe" vs2019 --file="${{github.workspace}}\test\premake5.lua" --no-overwrite-option
+          "${{github.workspace}}\vendor\premake5.exe" vs2019 --file="${{github.workspace}}\test\premake5.lua" --change-skip-old-files
       - name: build projects
         shell: cmd
         run: |

@@ -8,7 +8,33 @@ newoption {
     }
 }
 include "openssl.lua"
+-- this function is mainly used for curl_config.h
+local function config_libcurl(dir)
+    print("configuring libcurl...")
+    os.execute("cmake " .. dir)
+    print("libcurl config finished!")
+end
+function unix_libcurl_links()
+    filter "system:macosx or linux"
+        links {
+            "ssl",
+            "crypto"
+        }
+    filter "system:macosx"
+        libdirs {
+            "/usr/local/opt/zlib/lib",
+            "/usr/local/opt/libssh2/lib",
+            "/usr/local/opt/openldap/lib"
+        }
+        links {
+            "z",
+            "ssh2",
+            "ldap",
+            "lber"
+        }
+end
 project "curl"
+    config_libcurl(curldir)
     kind "StaticLib"
     language "C"
     cdialect "C11"
@@ -22,6 +48,7 @@ project "curl"
     defines {
         "BUILDING_LIBCURL",
         "CURL_STATICLIB",
+        "HAVE_CONFIG_H",
     }
     files {
         (curldir .. "/lib/**.c"),
@@ -29,12 +56,13 @@ project "curl"
         (curldir .. "/include/**.h"),
         _SCRIPT
     }
-    links {
-        "ws2_32.lib",
-        "crypt32.lib",
-        "wldap32.lib",
-    }
-    filter { "system:windows", "options:ssl=openssl" }
+    filter "system:windows"
+        links {
+            "ws2_32.lib",
+            "crypt32.lib",
+            "wldap32.lib",
+        }
+    filter "options:ssl=openssl" 
         links {
             "ssl",
             "crypto"

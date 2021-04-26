@@ -43,6 +43,7 @@ project "testproject"
         postbuildcommands {
             '{COPY} "C:/Program Files/OpenSSL/bin/*.dll" "%{cfg.targetdir}"'
         }
+    unix_libcurl_links()
     filter "configurations:Debug"
         symbols "on"
     filter "configurations:Release"

@@ -9,29 +9,47 @@ local function sslprojsettings()
     files {
         _SCRIPT
     }
-    defines {
-        "OPENSSL_CPUID_OBJ"
-    }
+    filter "system:windows"
+        defines {
+            "OPENSSL_CPUID_OBJ"
+        }
+    filter {}
 end
 local function asmbuildsettings()
-    asmformat = ""
-    asmcommand = ""
+    local asmformat = ""
+    local asmcommand = ""
     if os.istarget("windows") then
         asmformat = "nasm"
         asmcommand = 'nasm -f win64 -DNEAR -Ox'
     elseif os.istarget("linux") then
         asmformat = "elf"
-        asmcommand = "gcc -c -DOPENSSL_THREADS -D_REENTRANT -DDSO_DLFCN -DHAVE_DLFCN_H -Wa,--noexecstack -m64 -DL_ENDIAN -DTERMIO -O3 -Wall -DOPENSSL_IA32_SSE2 -DOPENSSL_BN_ASM_MONT -DOPENSSL_BN_ASM_MONT5 -DOPENSSL_BN_ASM_GF2m -DSHA1_ASM -DSHA256_ASM -DSHA512_ASM -DMD5_ASM -DAES_ASM -DVPAES_ASM -DBSAES_ASM -DWHIRLPOOL_ASM -DGHASH_ASM -DECP_NISTZ256_ASM -c"
+        asmcommand = "gcc -c"
+    elseif os.istarget("macosx") then
+        asmformat = "macosx"
+        asmcommand = "cc -arch x86_64 -c"
     end
-    out = "%{cfg.objdir}/%{file.basename}"
+    local out = "%{cfg.objdir}/%{file.basename}"
+    local perlexecutable = "perl"
+    if os.istarget("macosx") then
+        perlexecutable = "perl5"
+    end
+    local outext = ""
+    if os.istarget("windows") then
+        outext = "obj"
+    else
+        outext = "o"
+    end
     filter "files:**.pl"
         buildmessage "%{file.basename}.s"
         buildcommands {
-            ('perl "%{file.relpath}" ' .. asmformat .. ' "' .. out .. '.s"'),
-            (asmcommand .. ' -o "' .. out .. '.obj" "' .. out .. '.s"')
+            (perlexecutable .. ' "%{file.relpath}" ' .. asmformat .. ' "' .. out .. '.s"'),
+            (asmcommand .. ' -o "' .. out .. '.' .. outext .. '" "' .. out .. '.s"')
+        }
+        cleancommands {
+            'rm "' .. out .. '.' .. outext .. '"'
         }
         buildoutputs {
-            (out .. ".obj")
+            (out .. "." .. outext)
         }
 end
 newoption {
@@ -47,8 +65,8 @@ newoption {
     default = "none"
 }
 newoption {
-    trigger = "no-overwrite-option",
-    description = "Omit --skip-old-files in tar command"
+    trigger = "change-skip-old-files",
+    description = "Use -k instead of --skip-old-files in tar command"
 }
 local osslversion = _OPTIONS["openssl-version"]
 local osslrevision = _OPTIONS["openssl-revision"]
@@ -71,14 +89,22 @@ local function pull_openssl()
     local scriptdir = path.getdirectory(_SCRIPT)
     print("pulling openssl")
     os.execute("curl " .. openssl_url .. " -o " .. scriptdir .. "/openssl_source/source.tar.gz")
-    local extract_command = "tar -xvf " .. "openssl_source/source.tar.gz -C " .. "openssl_source/"
-    if not _OPTIONS["no-overwrite-option"] then
+    local extract_command = "tar -xf " .. "openssl_source/source.tar.gz -C " .. "openssl_source/"
+    if _OPTIONS["change-skip-old-files"] then
+        extract_command = extract_command .. " -k"
+    else
         extract_command = extract_command .. " --skip-old-files"
     end
     os.execute(extract_command)
     local command = ""
     if os.istarget("windows") then
         command = "perl Configure"
+    else
+        local arg = ""
+        if os.istarget("macosx") then
+            arg = " darwin64-x86_64-cc"
+        end
+        command = "./Configure" .. arg
     end
     os.execute("cd openssl_source/openssl-" .. osslversion .. osslrevision .. " && " .. command)
 end
