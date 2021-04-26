@@ -1,3 +1,4 @@
+include "openssl.lua"
 newoption {
     trigger = "ssl",
     value = "LIBRARY",
@@ -7,11 +8,16 @@ newoption {
         { "openssl", "OpenSSL" }
     }
 }
-include "openssl.lua"
--- this function is mainly used for curl_config.h
+-- this is mainly used for curl_config.h
+newoption {
+    trigger = "curlcmakeconfigdir",
+    value = "DIR",
+    description = "Directory to pass into CMake for configuration",
+    default = curldir .. "/build"
+}
 local function config_libcurl(dir)
     print("configuring libcurl...")
-    os.execute("cmake " .. dir)
+    os.execute("cmake " .. dir .. " -B " .. _OPTIONS["curlcmakeconfigdir"])
     print("libcurl config finished!")
 end
 function unix_libcurl_links()
@@ -44,6 +50,7 @@ project "curl"
     includedirs {
         (curldir .. "/include"),
         (curldir .. "/lib"),
+        (_OPTIONS["curlcmakeconfigdir"] .. "/lib"),
     }
     defines {
         "BUILDING_LIBCURL",
