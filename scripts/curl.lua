@@ -9,15 +9,9 @@ newoption {
     }
 }
 -- this is mainly used for curl_config.h
-newoption {
-    trigger = "curlcmakeconfigdir",
-    value = "DIR",
-    description = "Directory to pass into CMake for configuration",
-    default = curldir .. "/build"
-}
 local function config_libcurl(dir)
     print("configuring libcurl...")
-    os.execute("cmake " .. dir .. " -B " .. _OPTIONS["curlcmakeconfigdir"])
+    os.execute("cmake " .. dir .. " -B " .. curldir .. "/build")
     print("libcurl config finished!")
 end
 function unix_libcurl_links()
@@ -50,7 +44,7 @@ project "curl"
     includedirs {
         (curldir .. "/include"),
         (curldir .. "/lib"),
-        (_OPTIONS["curlcmakeconfigdir"] .. "/lib"),
+        (curldir .. "/build/lib"),
     }
     defines {
         "BUILDING_LIBCURL",

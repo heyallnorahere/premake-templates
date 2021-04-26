@@ -15,12 +15,23 @@ local function sslprojsettings()
         }
     filter {}
 end
+newoption {
+    trigger = "nasmexe",
+    value = "PATH",
+    description = "The path to the NASM executable",
+    default = "nasm"
+}
+newoption {
+    trigger = "perlexe",
+    value = "PATH",
+    description = "The path to the Perl executable"
+}
 local function asmbuildsettings()
     local asmformat = ""
     local asmcommand = ""
     if os.istarget("windows") then
         asmformat = "nasm"
-        asmcommand = 'nasm -f win64 -DNEAR -Ox'
+        asmcommand = _OPTIONS["nasmexe"] .. ' -f win64 -DNEAR -Ox'
     elseif os.istarget("linux") then
         asmformat = "elf"
         asmcommand = "gcc -c"
@@ -32,6 +43,9 @@ local function asmbuildsettings()
     local perlexecutable = "perl"
     if os.istarget("macosx") then
         perlexecutable = "perl5"
+    end
+    if _OPTIONS["perlexe"] then
+        perlexecutable = _OPTIONS["perlexe"]
     end
     local outext = ""
     if os.istarget("windows") then
@@ -89,7 +103,7 @@ local function pull_openssl()
     local scriptdir = path.getdirectory(_SCRIPT)
     print("pulling openssl")
     os.execute("curl " .. openssl_url .. " -o " .. scriptdir .. "/openssl_source/source.tar.gz")
-    local extract_command = "tar -xf " .. "openssl_source/source.tar.gz -C " .. "openssl_source/"
+    local extract_command = "tar -xvf " .. "openssl_source/source.tar.gz -C " .. "openssl_source/"
     if _OPTIONS["change-skip-old-files"] then
         extract_command = extract_command .. " -k"
     else

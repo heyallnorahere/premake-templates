@@ -15,8 +15,10 @@ workspace "test-workspace"
         }
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 curldir = "../test/curl"
+gladdir = "../test/glad/build"
 group "dependencies"
 include "../scripts/curl.lua"
+include "../scripts/glad.lua"
 group ""
 project "testproject"
     location "testproject"
@@ -37,7 +39,8 @@ project "testproject"
         "CURL_STATICLIB",
     }
     links {
-        "curl"
+        "curl",
+        "glad"
     }
     filter "system:windows"
         postbuildcommands {

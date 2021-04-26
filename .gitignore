@@ -16,6 +16,11 @@ bin/
 bin-int/
 # pulled repositories
 curl/
+glad/
+glfw/
+# pulled nasm executables
+nasm.zip
+nasm/
 # openssl
 openssl_include/
 # output from testproject

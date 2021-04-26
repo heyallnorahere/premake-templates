@@ -8,13 +8,26 @@ jobs:
       MSBUILD_PATH: C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\
     steps:
       - uses: actions/checkout@v2
-      - name: pull curl
+      - name: pull git repositories
+        shell: cmd
         run: |
-          git clone https://github.com/curl/curl ${{github.workspace}}/test/curl
+          git clone https://github.com/curl/curl.git ${{github.workspace}}/test/curl
+          git clone https://github.com/Dav1dde/glad.git ${{github.workspace}}/test/glad
+          git clone https://github.com/glfw/glfw.git ${{github.workspace}}/test/glfw
+      - name: configure glad
+        shell: cmd
+        run: |
+          cmake ${{github.workspace}}/test/glad -B ${{github.workspace}}/test/glad/build
+          "%MSBUILD_PATH%\MSBuild.exe" "${{github.workspace}}\test\glad\build\GLAD.sln"
+      - name: download nasm
+        shell: cmd
+        run: |
+          curl https://www.nasm.us/pub/nasm/releasebuilds/2.14.02/win64/nasm-2.14.02-win64.zip -o ${{github.workspace}}/test/nasm.zip
+          call ${{github.workspace}}/extractzip.bat "${{github.workspace}}\test\nasm" "${{github.workspace}}\test\nasm.zip"
       - name: generate projects
         shell: cmd
         run: |
-          "${{github.workspace}}\vendor\premake5.exe" vs2019 --file="${{github.workspace}}\test\premake5.lua" --change-skip-old-files
+          "${{github.workspace}}\vendor\premake5.exe" vs2019 --file="${{github.workspace}}\test\premake5.lua" --change-skip-old-files --nasmexe="..\test\nasm\nasm-2.14.02\nasm"
       - name: build projects
         shell: cmd
         run: |
@@ -23,16 +36,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: pull curl
+      - name: pull git repositories
         run: |
-          git clone https://github.com/curl/curl ${{github.workspace}}/test/curl
+          git clone https://github.com/curl/curl.git ${{github.workspace}}/test/curl
+          git clone https://github.com/Dav1dde/glad.git ${{github.workspace}}/test/glad
+          git clone https://github.com/glfw/glfw.git ${{github.workspace}}/test/glfw
+      - name: configure glad
+        run: |
+          cmake ${{github.workspace}}/test/glad -B ${{github.workspace}}/test/glad/build
+          make -C ${{github.workspace}}/test/glad/build
       - name: generate projects
         run: |
-          chmod +x ${{github.workspace}}/vendor/premake5
           ${{github.workspace}}/vendor/premake5 gmake --file=${{github.workspace}}/test/premake5.lua
-      - name: install nasm
-        run: |
-          sudo apt-get install nasm
       - name: build projects
         run: |
           make -C ${{github.workspace}}/test
